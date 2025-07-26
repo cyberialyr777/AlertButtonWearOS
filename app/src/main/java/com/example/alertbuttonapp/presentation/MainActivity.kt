@@ -89,11 +89,10 @@ fun EmergencyScreen() {
                             modifier = Modifier.padding(horizontal = 10.dp)
                         )
                         Text(
-                            text = "En caso de emergencia, presiona el botón.",
-                            style = MaterialTheme.typography.caption1,
+                            text = "Pesiona el botón para enviar una alerta.",
                             fontSize = 8.sp,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 10.dp)
+                            color = Color.Gray,
                         )
                     }
                 }
@@ -106,13 +105,13 @@ fun EmergencyScreen() {
                         modifier = Modifier.size(80.dp),
                         shape = CircleShape,
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color.LightGray
+                            backgroundColor = Color(0xFFB75656)
                         )
                     ) {
                         Text(
                             text = "SOS",
                             style = MaterialTheme.typography.title2,
-                            color = Color.Black
+                            color = Color.White
                         )
                     }
                 }
