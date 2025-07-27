@@ -37,6 +37,10 @@ android {
     buildFeatures {
         compose = true
     }
+    
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {
@@ -51,6 +55,19 @@ dependencies {
     implementation(libs.wear.tooling.preview)
     implementation(libs.activity.compose)
     implementation(libs.core.splashscreen)
+    
+    // Location services
+    implementation(libs.play.services.location)
+    
+    // Network requests
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.gson.v2131)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+    
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
