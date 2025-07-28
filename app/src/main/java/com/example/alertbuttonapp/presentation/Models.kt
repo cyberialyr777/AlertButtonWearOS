@@ -40,7 +40,7 @@ data class AlertResponse(
     val contactsNotified: Int = 0
 )
 
-// Modelo de Usuario (según tu README_BACKEND.md)
+// Modelo de Usuario que coincide con la respuesta de tu API
 data class User(
     @SerializedName("id")
     val id: String,
@@ -48,24 +48,26 @@ data class User(
     val email: String,
     @SerializedName("name")
     val name: String,
-    @SerializedName("phone")
-    val phone: String? = null
+    @SerializedName("last_name")
+    val lastName: String,
+    @SerializedName("phone_number")
+    val phoneNumber: String,
+    @SerializedName("active")
+    val active: Boolean
 )
 
-// Modelo para la petición de Login
+// Modelo para la respuesta de autenticación que coincide con tu API
+data class AuthResponse(
+    @SerializedName("access_token")
+    val accessToken: String,
+    @SerializedName("user")
+    val user: User
+)
+
+// La clase LoginRequest se mantiene igual
 data class LoginRequest(
     @SerializedName("email")
     val email: String,
     @SerializedName("password")
     val password: String
-)
-
-// Modelo para la respuesta de autenticación (según tu README_BACKEND.md)
-data class AuthResponse(
-    @SerializedName("user")
-    val user: User,
-    @SerializedName("accessToken")
-    val accessToken: String,
-    @SerializedName("refreshToken")
-    val refreshToken: String
 )

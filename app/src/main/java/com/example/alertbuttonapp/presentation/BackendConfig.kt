@@ -1,6 +1,5 @@
 package com.example.alertbuttonapp.presentation
 
 object BackendConfig {
-    // URL base del backend - CAMBIAR POR TU URL REAL
-    const val BASE_URL = "https://tu-backend-alertas.com/api/"
-} 
+    const val BASE_URL = "https://2pwfb4tn-3000.usw3.devtunnels.ms/auth/login"
+}

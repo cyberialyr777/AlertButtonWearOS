@@ -54,21 +54,25 @@ fun AuthScreen(
                 onClick = {
                     isLoading = true
                     errorMessage = null
+                    // En AuthScreen.kt, dentro del onClick del Button
+
                     scope.launch {
                         try {
                             val response = apiService.login(LoginRequest(email, password))
                             if (response.isSuccessful && response.body() != null) {
                                 val authResponse = response.body()!!
-                                // Guardar sesión
+
+                                // Guardar el token y los datos del usuario
                                 SessionManager.saveAuthToken(context, authResponse.accessToken)
-                                SessionManager.saveUserId(context, authResponse.user.id)
-                                // Notificar éxito
+                                SessionManager.saveUser(context, authResponse.user)
+
+                                // Navegar a la siguiente pantalla
                                 onLoginSuccess()
                             } else {
                                 errorMessage = "Credenciales inválidas"
                             }
                         } catch (e: Exception) {
-                            errorMessage = "Error de red"
+                            errorMessage = "Error de red: ${e.message}"
                         } finally {
                             isLoading = false
                         }
