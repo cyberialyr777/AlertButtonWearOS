@@ -63,8 +63,10 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.gson.v2131)
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    
+    implementation(libs.okhttp)
+
+    implementation(libs.org.eclipse.paho.client.mqttv3)
+    implementation(libs.org.eclipse.paho.android.service)
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     

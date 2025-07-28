@@ -3,13 +3,19 @@ package com.example.alertbuttonapp.presentation
 import android.location.Location
 import retrofit2.Response
 import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 // Interfaz para las peticiones HTTP
 interface ApiService {
     // Alertas de emergencia
     @POST("alerts/emergency")
     suspend fun sendEmergencyAlert(@Body alert: EmergencyAlert): Response<AlertResponse>
+
+    @POST("auth/login")
+    suspend fun login(@Body request: LoginRequest): retrofit2.Response<AuthResponse>
 }
+
 
 // Cliente Retrofit
 object RetrofitClient {

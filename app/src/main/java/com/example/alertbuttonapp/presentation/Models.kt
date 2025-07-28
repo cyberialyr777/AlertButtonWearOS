@@ -38,4 +38,34 @@ data class AlertResponse(
     val alertId: String? = null,
     @SerializedName("contacts_notified")
     val contactsNotified: Int = 0
-) 
+)
+
+// Modelo de Usuario (según tu README_BACKEND.md)
+data class User(
+    @SerializedName("id")
+    val id: String,
+    @SerializedName("email")
+    val email: String,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("phone")
+    val phone: String? = null
+)
+
+// Modelo para la petición de Login
+data class LoginRequest(
+    @SerializedName("email")
+    val email: String,
+    @SerializedName("password")
+    val password: String
+)
+
+// Modelo para la respuesta de autenticación (según tu README_BACKEND.md)
+data class AuthResponse(
+    @SerializedName("user")
+    val user: User,
+    @SerializedName("accessToken")
+    val accessToken: String,
+    @SerializedName("refreshToken")
+    val refreshToken: String
+)
