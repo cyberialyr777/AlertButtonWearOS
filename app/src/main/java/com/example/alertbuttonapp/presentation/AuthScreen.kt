@@ -10,6 +10,8 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.*
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 
 @Composable
@@ -25,28 +27,42 @@ fun AuthScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // En AuthScreen.kt, reemplaza tu ScalingLazyColumn
+
     ScalingLazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
     ) {
         item { Text("Iniciar Sesión", style = MaterialTheme.typography.title3) }
 
         item {
-            // Este es un TextField muy básico. En una app real, podrías usar un
-            // InputChip para abrir un teclado en pantalla completa.
+            // TextField para el Email (mejorado)
             BasicTextField(
                 value = email,
                 onValueChange = { email = it },
-                modifier = Modifier.padding(8.dp)
+                decorationBox = { innerTextField ->
+                    Box(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)) {
+                        if (email.isEmpty()) Text("Email", color = Color.Gray)
+                        innerTextField()
+                    }
+                },
+                textStyle = TextStyle(color = Color.White)
             )
         }
         item {
+            // TextField para la Contraseña (mejorado)
             BasicTextField(
                 value = password,
                 onValueChange = { password = it },
                 visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.padding(8.dp)
+                decorationBox = { innerTextField ->
+                    Box(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)) {
+                        if (password.isEmpty()) Text("Contraseña", color = Color.Gray)
+                        innerTextField()
+                    }
+                },
+                textStyle = TextStyle(color = Color.White)
             )
         }
 
@@ -55,19 +71,13 @@ fun AuthScreen(
                 onClick = {
                     isLoading = true
                     errorMessage = null
-                    // En AuthScreen.kt, dentro del onClick del Button
-
                     scope.launch {
                         try {
                             val response = apiService.login(LoginRequest(email, password))
                             if (response.isSuccessful && response.body() != null) {
                                 val authResponse = response.body()!!
-
-                                // Guardar el token y los datos del usuario
                                 SessionManager.saveAuthToken(context, authResponse.accessToken)
                                 SessionManager.saveUser(context, authResponse.user)
-
-                                // Navegar a la siguiente pantalla
                                 onLoginSuccess()
                             } else {
                                 errorMessage = "Credenciales inválidas"
@@ -79,7 +89,7 @@ fun AuthScreen(
                         }
                     }
                 },
-                enabled = !isLoading
+                enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty()
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
