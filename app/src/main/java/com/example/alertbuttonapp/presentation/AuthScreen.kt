@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.material.ScalingLazyColumn
 
 @Composable
 fun AuthScreen(
