@@ -44,6 +44,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".presentation.LocationAlertService"
+            android:foregroundServiceType="location"
+            tools:ignore="ForegroundServicePermission" />
+
     </application>
 
 </manifest>

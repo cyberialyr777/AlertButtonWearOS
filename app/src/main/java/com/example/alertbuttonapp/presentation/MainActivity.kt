@@ -1,19 +1,3 @@
-/*
- * Copyright 2024 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.alertbuttonapp.presentation
 
 import android.Manifest
@@ -507,7 +491,7 @@ fun AppNavigation(
 ) {
     var currentScreen by remember { mutableStateOf(Screen.Emergency) }
     var contacts by remember { 
-        mutableStateOf<List<EmergencyContact>>(
+        mutableStateOf(
             listOf(
                 EmergencyContact(
                     id = "1",
@@ -582,12 +566,12 @@ fun AppNavigation(
             ContactEditScreen(
                 contact = editingContact,
                 onSave = { contact ->
-                    if (editingContact != null) {
+                    contacts = if (editingContact != null) {
                         // Edit existing contact
-                        contacts = contacts.map { if (it.id == contact.id) contact else it }
+                        contacts.map { if (it.id == contact.id) contact else it }
                     } else {
                         // Add new contact
-                        contacts = contacts + contact
+                        contacts + contact
                     }
                     currentScreen = Screen.ContactManager
                 },

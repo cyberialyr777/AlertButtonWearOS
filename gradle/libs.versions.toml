@@ -6,6 +6,9 @@ gsonVersion = "2.13.1"
 kotlin = "2.0.21"
 kotlinxCoroutinesAndroid = "1.8.0"
 navigationCompose = "2.9.2"
+okhttp = "5.1.0"
+orgEclipsePahoAndroidService = "1.1.1"
+orgEclipsePahoClientMqttv3 = "1.2.5"
 playServicesLocation = "21.3.0"
 playServicesWearable = "18.0.0"
 composeBom = "2024.09.00"
@@ -22,6 +25,9 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 gson-v2131 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+org-eclipse-paho-android-service = { module = "org.eclipse.paho:org.eclipse.paho.android.service", version.ref = "orgEclipsePahoAndroidService" }
+org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "orgEclipsePahoClientMqttv3" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
