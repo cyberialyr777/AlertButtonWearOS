@@ -495,7 +495,7 @@ fun AppNavigation(
 
     // Lógica para decidir la pantalla inicial
     val initialScreen = if (SessionManager.getAuthToken(context) != null) {
-        Screen.Emergency
+        Screen.Auth
     } else {
         Screen.Auth
     }
