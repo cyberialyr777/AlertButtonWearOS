@@ -485,63 +485,60 @@ fun SuccessScreen(
 }
 
 // Main app navigation
+// En MainActivity.kt, reemplaza la función AppNavigation entera
+
 @Composable
 fun AppNavigation(
     onRequestLocationPermission: () -> Unit
 ) {
-    var currentScreen by remember { mutableStateOf(Screen.Emergency) }
-    var contacts by remember { 
+    val context = LocalContext.current
+
+    // Lógica para decidir la pantalla inicial
+    val initialScreen = if (SessionManager.getAuthToken(context) != null) {
+        Screen.Emergency
+    } else {
+        Screen.Auth
+    }
+    var currentScreen by remember { mutableStateOf(initialScreen) }
+
+    // El resto de tu código de 'contacts' y 'editingContact' se mantiene igual
+    var contacts by remember {
         mutableStateOf(
             listOf(
-                EmergencyContact(
-                    id = "1",
-                    name = "Mom",
-                    phoneNumber = "+1234567890",
-                    email = "mom@example.com",
-                    isActive = true
-                ),
-                EmergencyContact(
-                    id = "2",
-                    name = "Dad",
-                    phoneNumber = "+1234567891",
-                    email = "dad@example.com",
-                    isActive = true
-                ),
-                EmergencyContact(
-                    id = "3",
-                    name = "Emergency",
-                    phoneNumber = "911",
-                    email = null,
-                    isActive = true
-                )
+                EmergencyContact("1", "Mom", "+1234567890", "mom@example.com", true),
+                EmergencyContact("2", "Dad", "+1234567891", "dad@example.com", true),
+                EmergencyContact("3", "Emergency", "911", null, true)
             )
-        ) 
+        )
     }
     var editingContact by remember { mutableStateOf<EmergencyContact?>(null) }
-    
+
+    // Navegación corregida
     when (currentScreen) {
-        Screen.Emergency -> {
-            EmergencyScreen(
-                onRequestLocationPermission = onRequestLocationPermission,
-                contacts = contacts,
-                onShowContacts = {
-                    currentScreen = Screen.Contacts
-                },
-                onManageContacts = {
-                    currentScreen = Screen.ContactManager
-                }
-            )
-        }
-        
-        Screen.Contacts -> {
-            ContactsScreen(
-                contacts = contacts,
-                onBackToMain = {
+        Screen.Auth -> {
+            AuthScreen(
+                onLoginSuccess = {
                     currentScreen = Screen.Emergency
                 }
             )
         }
-        
+
+        Screen.Emergency -> {
+            EmergencyScreen(
+                onRequestLocationPermission = onRequestLocationPermission,
+                contacts = contacts,
+                onShowContacts = { currentScreen = Screen.Contacts },
+                onManageContacts = { currentScreen = Screen.ContactManager }
+            )
+        }
+
+        Screen.Contacts -> {
+            ContactsScreen(
+                contacts = contacts,
+                onBackToMain = { currentScreen = Screen.Emergency }
+            )
+        }
+
         Screen.ContactManager -> {
             ContactManagerScreen(
                 contacts = contacts,
@@ -556,21 +553,17 @@ fun AppNavigation(
                 onDeleteContact = { contact ->
                     contacts = contacts.filter { it.id != contact.id }
                 },
-                onBackToMain = {
-                    currentScreen = Screen.Emergency
-                }
+                onBackToMain = { currentScreen = Screen.Emergency }
             )
         }
-        
+
         Screen.ContactEdit -> {
             ContactEditScreen(
                 contact = editingContact,
                 onSave = { contact ->
                     contacts = if (editingContact != null) {
-                        // Edit existing contact
                         contacts.map { if (it.id == contact.id) contact else it }
                     } else {
-                        // Add new contact
                         contacts + contact
                     }
                     currentScreen = Screen.ContactManager
@@ -585,12 +578,12 @@ fun AppNavigation(
 
 // Enum for screens
 enum class Screen {
+    Auth,
     Emergency,
     Contacts,
     ContactManager,
     ContactEdit
 }
-
 @Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
