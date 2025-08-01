@@ -178,8 +178,8 @@ fun EmergencyScreen(
                         } else {
                             "Not available"
                         }
-                        
-                        val result = alertService.sendEmergencyAlert(location, contacts)
+
+                        val result = alertService.sendEmergencyAlert(location, contacts, context)
                         result.onSuccess { response ->
                             alertResponse = response
                             showSuccess = true
@@ -484,14 +484,12 @@ fun SuccessScreen(
     }
 }
 
-// Main app navigation
-// En MainActivity.kt, reemplaza la función AppNavigation entera
-
 @Composable
 fun AppNavigation(
     onRequestLocationPermission: () -> Unit
 ) {
     val context = LocalContext.current
+    val apiService = RetrofitClient.getApiService(context) // Obtenemos la instancia de ApiService
 
     // Lógica para decidir la pantalla inicial
     val initialScreen = if (SessionManager.getAuthToken(context) != null) {
@@ -501,19 +499,38 @@ fun AppNavigation(
     }
     var currentScreen by remember { mutableStateOf(initialScreen) }
 
-    // El resto de tu código de 'contacts' y 'editingContact' se mantiene igual
-    var contacts by remember {
-        mutableStateOf(
-            listOf(
-                EmergencyContact("1", "Mom", "+1234567890", "mom@example.com", true),
-                EmergencyContact("2", "Dad", "+1234567891", "dad@example.com", true),
-                EmergencyContact("3", "Emergency", "911", null, true)
-            )
-        )
-    }
+    // 1. La lista de contactos ahora empieza vacía. Se llenará desde el backend.
+    var contacts by remember { mutableStateOf<List<EmergencyContact>>(emptyList()) }
     var editingContact by remember { mutableStateOf<EmergencyContact?>(null) }
 
-    // Navegación corregida
+    // 2. Usamos LaunchedEffect para cargar los contactos cuando la app inicia (después del login)
+    // Se ejecutará cada vez que la pantalla de Emergencia (o una superior) se componga.
+    LaunchedEffect(currentScreen) {
+        if (currentScreen == Screen.Emergency || currentScreen == Screen.Contacts || currentScreen == Screen.ContactManager) {
+            val userId = SessionManager.getUserId(context)
+            if (userId != null) {
+                try {
+                    val response = apiService.getContacts(userId)
+
+                    if (response.isSuccessful) {
+                        // ¡Éxito! Actualizamos la lista de contactos.
+                        contacts = response.body() ?: emptyList()
+                    } else {
+                        // Error del servidor (4xx, 5xx). Mostramos un error más detallado.
+                        val errorCode = response.code()
+                        val errorMessage = response.errorBody()?.string() ?: "Error desconocido"
+                        Toast.makeText(context, "Error $errorCode: $errorMessage", Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    // Error de red o al procesar la solicitud.
+                    Toast.makeText(context, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    // El resto de la navegación se mantiene igual.
+    // Ahora, las pantallas recibirán la lista de contactos actualizada desde el backend.
     when (currentScreen) {
         Screen.Auth -> {
             AuthScreen(
@@ -526,7 +543,7 @@ fun AppNavigation(
         Screen.Emergency -> {
             EmergencyScreen(
                 onRequestLocationPermission = onRequestLocationPermission,
-                contacts = contacts,
+                contacts = contacts, // Se pasa la lista de contactos (ahora desde el backend)
                 onShowContacts = { currentScreen = Screen.Contacts },
                 onManageContacts = { currentScreen = Screen.ContactManager }
             )
@@ -534,14 +551,14 @@ fun AppNavigation(
 
         Screen.Contacts -> {
             ContactsScreen(
-                contacts = contacts,
+                contacts = contacts, // También recibe la lista actualizada
                 onBackToMain = { currentScreen = Screen.Emergency }
             )
         }
 
         Screen.ContactManager -> {
             ContactManagerScreen(
-                contacts = contacts,
+                contacts = contacts, // Y esta también
                 onAddContact = {
                     editingContact = null
                     currentScreen = Screen.ContactEdit
@@ -551,6 +568,7 @@ fun AppNavigation(
                     currentScreen = Screen.ContactEdit
                 },
                 onDeleteContact = { contact ->
+                    // Lógica para borrar se implementará en el siguiente paso
                     contacts = contacts.filter { it.id != contact.id }
                 },
                 onBackToMain = { currentScreen = Screen.Emergency }
@@ -561,6 +579,7 @@ fun AppNavigation(
             ContactEditScreen(
                 contact = editingContact,
                 onSave = { contact ->
+                    // Lógica para guardar se implementará en el siguiente paso
                     contacts = if (editingContact != null) {
                         contacts.map { if (it.id == contact.id) contact else it }
                     } else {
