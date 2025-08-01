@@ -14,8 +14,24 @@ interface ApiService {
 
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): retrofit2.Response<AuthResponse>
-}
 
+    // Obtener contactos por ID de usuario
+    @GET("emergency-contacts/user/{userId}")
+    suspend fun getContacts(@Path("userId") userId: String): Response<List<EmergencyContact>>
+
+    // Crear un nuevo contacto
+    @POST("emergency-contacts")
+    suspend fun createContact(@Body contact: EmergencyContact): Response<EmergencyContact>
+
+    // Actualizar un contacto existente por su ID
+    @PATCH("emergency-contacts/{contactId}")
+    suspend fun updateContact(@Path("contactId") contactId: String, @Body contact: EmergencyContact): Response<EmergencyContact>
+
+    // Eliminar un contacto por su ID
+    @DELETE("emergency-contacts/{contactId}")
+    suspend fun deleteContact(@Path("contactId") contactId: String): Response<Unit>
+
+}
 
 // Cliente Retrofit
 object RetrofitClient {
