@@ -20,7 +20,7 @@ fun AuthScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val apiService = RetrofitClient.apiService
+    val apiService = RetrofitClient.getApiService(context)
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

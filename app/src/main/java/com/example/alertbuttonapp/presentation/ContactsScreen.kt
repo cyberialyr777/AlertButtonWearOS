@@ -83,6 +83,7 @@ fun ContactsScreen(
     }
 }
 
+// In ContactsScreen.kt
 @Composable
 fun ContactItem(contact: EmergencyContact) {
     Column(
@@ -96,10 +97,11 @@ fun ContactItem(contact: EmergencyContact) {
             color = if (contact.isActive) Color.White else Color.Gray
         )
         Text(
-            text = contact.phoneNumber,
+            // CORRECTION: Use '?:' to provide a default value if phoneNumber is null
+            text = contact.phoneNumber ?: "No phone number",
             fontSize = 7.sp,
             textAlign = TextAlign.Center,
             color = Color.Gray
         )
     }
-} 
+}

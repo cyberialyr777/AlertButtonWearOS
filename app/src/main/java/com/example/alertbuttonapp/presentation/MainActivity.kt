@@ -178,8 +178,8 @@ fun EmergencyScreen(
                         } else {
                             "Not available"
                         }
-                        
-                        val result = alertService.sendEmergencyAlert(location, contacts)
+
+                        val result = alertService.sendEmergencyAlert(location, contacts, context)
                         result.onSuccess { response ->
                             alertResponse = response
                             showSuccess = true
@@ -484,43 +484,45 @@ fun SuccessScreen(
     }
 }
 
-// Main app navigation
-// En MainActivity.kt, reemplaza la función AppNavigation entera
-
 @Composable
 fun AppNavigation(
     onRequestLocationPermission: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope() // CoroutineScope para lanzar las llamadas a la API
+    val apiService = RetrofitClient.getApiService(context)
 
-    // Lógica para decidir la pantalla inicial
-    val initialScreen = if (SessionManager.getAuthToken(context) != null) {
-        Screen.Auth
-    } else {
-        Screen.Auth
-    }
+    val initialScreen = if (SessionManager.getAuthToken(context) != null) Screen.Auth else Screen.Auth
     var currentScreen by remember { mutableStateOf(initialScreen) }
 
-    // El resto de tu código de 'contacts' y 'editingContact' se mantiene igual
-    var contacts by remember {
-        mutableStateOf(
-            listOf(
-                EmergencyContact("1", "Mom", "+1234567890", "mom@example.com", true),
-                EmergencyContact("2", "Dad", "+1234567891", "dad@example.com", true),
-                EmergencyContact("3", "Emergency", "911", null, true)
-            )
-        )
-    }
+    var contacts by remember { mutableStateOf<List<EmergencyContact>>(emptyList()) }
     var editingContact by remember { mutableStateOf<EmergencyContact?>(null) }
 
-    // Navegación corregida
+    // Carga los contactos del backend cuando estás en una pantalla que los necesita
+    LaunchedEffect(currentScreen) {
+        if (currentScreen == Screen.Emergency || currentScreen == Screen.Contacts || currentScreen == Screen.ContactManager) {
+            val userId = SessionManager.getUserId(context)
+            if (userId != null) {
+                try {
+                    val response = apiService.getContacts(userId)
+                    if (response.isSuccessful) {
+                        contacts = response.body() ?: emptyList()
+                    } else {
+                        val errorCode = response.code()
+                        val errorMessage = response.errorBody()?.string() ?: "Unknown error"
+                        Toast.makeText(context, "Error $errorCode: $errorMessage", Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Connection error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    // Navegación y lógica principal de la aplicación
     when (currentScreen) {
         Screen.Auth -> {
-            AuthScreen(
-                onLoginSuccess = {
-                    currentScreen = Screen.Emergency
-                }
-            )
+            AuthScreen(onLoginSuccess = { currentScreen = Screen.Emergency })
         }
 
         Screen.Emergency -> {
@@ -550,8 +552,21 @@ fun AppNavigation(
                     editingContact = contact
                     currentScreen = Screen.ContactEdit
                 },
-                onDeleteContact = { contact ->
-                    contacts = contacts.filter { it.id != contact.id }
+                onDeleteContact = { contactToDelete ->
+                    scope.launch {
+                        try {
+                            val response = apiService.deleteContact(contactToDelete.id)
+                            if (response.isSuccessful) {
+                                // Si se borra en el backend, actualiza la lista local
+                                contacts = contacts.filter { it.id != contactToDelete.id }
+                                Toast.makeText(context, "Contact deleted", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Error deleting: ${response.code()}", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 },
                 onBackToMain = { currentScreen = Screen.Emergency }
             )
@@ -560,13 +575,37 @@ fun AppNavigation(
         Screen.ContactEdit -> {
             ContactEditScreen(
                 contact = editingContact,
-                onSave = { contact ->
-                    contacts = if (editingContact != null) {
-                        contacts.map { if (it.id == contact.id) contact else it }
-                    } else {
-                        contacts + contact
+                onSave = { contactToSave ->
+                    scope.launch {
+                        try {
+                            // Si 'editingContact' es null, es un contacto nuevo
+                            if (editingContact == null) {
+                                val response = apiService.createContact(contactToSave)
+                                if (response.isSuccessful && response.body() != null) {
+                                    val newContact = response.body()!!
+                                    contacts = contacts + newContact // Añade el nuevo contacto a la lista
+                                    Toast.makeText(context, "Contact added", Toast.LENGTH_SHORT).show()
+                                    currentScreen = Screen.ContactManager // Vuelve a la lista
+                                } else {
+                                    Toast.makeText(context, "Error adding: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                // Si no, es una edición de un contacto existente
+                                val response = apiService.updateContact(contactToSave.id, contactToSave)
+                                if (response.isSuccessful && response.body() != null) {
+                                    val updatedContact = response.body()!!
+                                    // Reemplaza el contacto viejo con el actualizado
+                                    contacts = contacts.map { if (it.id == updatedContact.id) updatedContact else it }
+                                    Toast.makeText(context, "Contact updated", Toast.LENGTH_SHORT).show()
+                                    currentScreen = Screen.ContactManager // Vuelve a la lista
+                                } else {
+                                    Toast.makeText(context, "Error updating: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                    currentScreen = Screen.ContactManager
                 },
                 onCancel = {
                     currentScreen = Screen.ContactManager

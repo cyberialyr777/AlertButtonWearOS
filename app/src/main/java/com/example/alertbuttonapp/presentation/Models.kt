@@ -3,13 +3,14 @@ package com.example.alertbuttonapp.presentation
 import com.google.gson.annotations.SerializedName
 
 // Modelo de contacto de emergencia
+// In Models.kt
 data class EmergencyContact(
     @SerializedName("id")
     val id: String,
     @SerializedName("name")
     val name: String,
     @SerializedName("phone")
-    val phoneNumber: String,
+    val phoneNumber: String?, // <-- CORRECTION: Added '?' to make it nullable
     @SerializedName("email")
     val email: String? = null,
     @SerializedName("is_active")
